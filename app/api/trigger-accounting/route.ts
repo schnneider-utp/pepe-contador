@@ -2,16 +2,8 @@ import { NextResponse } from "next/server"
 
 export async function POST() {
   try {
-    // URL del webhook de Make (deberás configurar esto)
-    const makeWebhookUrl = process.env.MAKE_WEBHOOK_URL
-
-    if (!makeWebhookUrl) {
-      console.error("[v0] MAKE_WEBHOOK_URL not configured")
-      return NextResponse.json(
-        { error: "Webhook no configurado. Por favor configura MAKE_WEBHOOK_URL en las variables de entorno." },
-        { status: 500 },
-      )
-    }
+    // URL del webhook de Make (usando directamente la URL proporcionada)
+    const makeWebhookUrl = "https://hook.us2.make.com/hv6tie5an1bma04wpj0dssc8b13ooeqo"
 
     // Enviar trigger a Make
     const response = await fetch(makeWebhookUrl, {
@@ -30,12 +22,13 @@ export async function POST() {
       throw new Error("Error al comunicarse con Make")
     }
 
-    const data = await response.json().catch(() => ({}))
+    const responseText = await response.text()
+    console.log("[v0] Make webhook response:", responseText)
 
     return NextResponse.json({
       success: true,
       message: "Proceso contable activado correctamente",
-      data,
+      response: responseText,
     })
   } catch (error) {
     console.error("[v0] Error triggering accounting process:", error)
