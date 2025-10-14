@@ -5,7 +5,7 @@ import type React from "react"
 import { useState, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Upload, FolderOpen, CheckCircle2, AlertCircle } from "lucide-react"
+import { Upload, FolderOpen, CheckCircle2, AlertCircle, ExternalLink } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 export function FileUploadSection() {
@@ -187,6 +187,15 @@ export function FileUploadSection() {
             <strong className="text-foreground">Nota:</strong>  Este botón activará el webhook configurado en Make. Asegúrate de tener tu escenario de Make configurado y activo.
           </p>
         </div>
+
+        <Button
+          variant="outline"
+          className="w-full flex items-center justify-center gap-2"
+          onClick={() => window.open('https://docs.google.com/spreadsheets/d/1Yl2qDkoUw4Q5zYv3RCXt8Cys3_UVtBuGQDCA309XAAA/edit?usp=drive_link', '_blank')}
+        >
+          <ExternalLink className="h-4 w-4" />
+          Ver en Google Sheets
+        </Button>
       </CardContent>
     </Card>
   )
