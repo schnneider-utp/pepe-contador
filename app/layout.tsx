@@ -4,6 +4,8 @@ import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import { Toaster } from "@/components/ui/toaster"
+import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { Suspense } from "react"
 import "./globals.css"
 
@@ -19,13 +21,16 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} antialiased`}>
-        <Suspense fallback={null}>
-          {children}
-          <Toaster />
-        </Suspense>
-        <Analytics />
+        <ThemeProvider defaultTheme="system" storageKey="theme-preference">
+          <Suspense fallback={null}>
+            {children}
+            <ThemeToggle />
+            <Toaster />
+          </Suspense>
+          <Analytics />
+        </ThemeProvider>
       </body>
     </html>
   )
