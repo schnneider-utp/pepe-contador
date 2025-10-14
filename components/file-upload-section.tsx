@@ -14,6 +14,11 @@ export function FileUploadSection() {
   const [uploadStatus, setUploadStatus] = useState<"idle" | "success" | "error">("idle")
   const { toast } = useToast()
 
+  const resetForm = () => {
+    setFiles([])
+    setUploadStatus("idle")
+  }
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setFiles(Array.from(e.target.files))
@@ -55,23 +60,46 @@ export function FileUploadSection() {
         body: formData,
       })
 
-      if (!response.ok) throw new Error("Error al subir archivos")
+      const responseData = await response.json()
 
-      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(responseData.error || "Error al subir archivos")
+      }
+
+      // Guardar en localStorage
+      const uploadRecord = {
+        folderName: responseData.folderName,
+        filesCount: files.length,
+        timestamp: new Date().toISOString(),
+        fileNames: files.map(f => f.name)
+      }
+
+      try {
+        const existingHistory = JSON.parse(localStorage.getItem('uploadHistory') || '[]')
+        localStorage.setItem('uploadHistory', JSON.stringify([uploadRecord, ...existingHistory]))
+      } catch (storageError) {
+        console.error("[v0] Error saving to localStorage:", storageError)
+        // No interrumpimos el flujo si falla el localStorage
+      }
 
       setUploadStatus("success")
       toast({
         title: "¡Archivos subidos!",
-        description: `${files.length} archivo(s) subido(s) a la carpeta: ${data.folderName}`,
+        description: `${files.length} archivo(s) subido(s) a la carpeta: ${responseData.folderName}`,
       })
 
-      setFiles([])
+      // Limpiar el formulario después de una subida exitosa
+      resetForm()
+      
+      // Limpiar el input de archivos
+      const fileInput = document.getElementById("file-upload") as HTMLInputElement
+      if (fileInput) fileInput.value = ""
     } catch (error) {
       console.error("[v0] Error uploading files:", error)
       setUploadStatus("error")
       toast({
         title: "Error al subir",
-        description: "Hubo un problema al subir los archivos. Por favor intenta de nuevo.",
+        description: error instanceof Error ? error.message : "Hubo un problema al subir los archivos. Por favor intenta de nuevo.",
         variant: "destructive",
       })
     } finally {
@@ -89,7 +117,7 @@ export function FileUploadSection() {
           <CardTitle className="text-2xl">Subir Archivos</CardTitle>
         </div>
         <CardDescription className="text-base">
-          Los archivos se organizarán automáticamente en carpetas por fecha en Google Drive
+          Los archivos se enviaran a google drive y seran analisados para extraer los datos de ellos
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -153,6 +181,12 @@ export function FileUploadSection() {
             <span className="font-medium">Error al subir archivos</span>
           </div>
         )}
+
+        <div className="bg-muted/30 rounded-lg p-4 border border-border mt-4">
+          <p className="text-sm text-muted-foreground">
+            <strong className="text-foreground">Nota:</strong>  Este botón activará el webhook configurado en Make. Asegúrate de tener tu escenario de Make configurado y activo.
+          </p>
+        </div>
       </CardContent>
     </Card>
   )

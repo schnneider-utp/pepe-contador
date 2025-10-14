@@ -1,47 +1,66 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Calculator, Play, CheckCircle2, AlertCircle } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { History, FileText, Calendar, Clock, ChevronDown, ChevronUp } from "lucide-react"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+
+type UploadRecord = {
+  folderName: string
+  filesCount: number
+  timestamp: string
+  fileNames: string[]
+}
 
 export function AccountingTriggerSection() {
-  const [triggering, setTriggering] = useState(false)
-  const [triggerStatus, setTriggerStatus] = useState<"idle" | "success" | "error">("idle")
-  const { toast } = useToast()
+  const [uploadHistory, setUploadHistory] = useState<UploadRecord[]>([])
+  const [expandedItems, setExpandedItems] = useState<{[key: string]: boolean}>({})
 
-  const handleTrigger = async () => {
-    setTriggering(true)
-    setTriggerStatus("idle")
-
-    try {
-      const response = await fetch("/api/trigger-accounting", {
-        method: "POST",
+  // Función para formatear la fecha
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr)
+    return {
+      date: date.toLocaleString('es-ES', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      }),
+      time: date.toLocaleString('es-ES', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
       })
-
-      if (!response.ok) throw new Error("Error al activar el proceso")
-
-      const data = await response.json()
-
-      setTriggerStatus("success")
-      toast({
-        title: "¡Proceso activado!",
-        description: "El proceso contable se ha iniciado correctamente en Make",
-      })
-
-      console.log("[v0] Trigger response:", data)
-    } catch (error) {
-      console.error("[v0] Error triggering accounting process:", error)
-      setTriggerStatus("error")
-      toast({
-        title: "Error al activar",
-        description: "Hubo un problema al activar el proceso. Por favor intenta de nuevo.",
-        variant: "destructive",
-      })
-    } finally {
-      setTriggering(false)
     }
+  }
+
+  // Cargar historial desde localStorage
+  useEffect(() => {
+    const loadHistory = () => {
+      const history = JSON.parse(localStorage.getItem('uploadHistory') || '[]')
+      setUploadHistory(history)
+    }
+
+    // Cargar al inicio
+    loadHistory()
+
+    // Escuchar cambios en localStorage
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'uploadHistory') {
+        loadHistory()
+      }
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+    return () => window.removeEventListener('storage', handleStorageChange)
+  }, [])
+
+  const toggleExpand = (timestamp: string) => {
+    setExpandedItems(prev => ({
+      ...prev,
+      [timestamp]: !prev[timestamp]
+    }))
   }
 
   return (
@@ -49,83 +68,87 @@ export function AccountingTriggerSection() {
       <CardHeader>
         <div className="flex items-center gap-3 mb-2">
           <div className="p-2 bg-primary/10 rounded-lg">
-            <Calculator className="h-6 w-6 text-primary" />
+            <History className="h-6 w-6 text-primary" />
           </div>
-          <CardTitle className="text-2xl">Proceso Contable</CardTitle>
+          <CardTitle className="text-2xl">Historial de Archivos</CardTitle>
         </div>
         <CardDescription className="text-base">
-          Activa el proceso contable automatizado en Make con un solo clic
+          Registro de archivos procesados organizados por fecha
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="bg-secondary/30 rounded-lg p-6 space-y-4">
-          <div className="flex items-start gap-3">
-            <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">
-              1
-            </div>
-            <div>
-              <h3 className="font-semibold text-foreground mb-1">Preparación</h3>
-              <p className="text-sm text-muted-foreground">
-                Asegúrate de que todos los archivos necesarios estén subidos
-              </p>
-            </div>
+      <CardContent>
+        <ScrollArea className="h-[400px] pr-4">
+          <div className="space-y-4">
+            {uploadHistory.map((record) => {
+              const formattedDate = formatDate(record.timestamp)
+              return (
+                <Collapsible
+                  key={record.timestamp}
+                  open={expandedItems[record.timestamp]}
+                  onOpenChange={() => toggleExpand(record.timestamp)}
+                  className="bg-secondary/30 rounded-lg p-4 space-y-2"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-5 w-5 text-primary" />
+                      <h3 className="font-semibold text-foreground">
+                        {record.folderName}
+                      </h3>
+                    </div>
+                    <CollapsibleTrigger asChild>
+                      <button className="hover:bg-secondary/50 p-1 rounded-full transition-colors">
+                        {expandedItems[record.timestamp] ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                      </button>
+                    </CollapsibleTrigger>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <FileText className="h-4 w-4" />
+                    <span>{record.filesCount} archivo(s) procesado(s)</span>
+                  </div>
+
+                  <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-3 w-3" />
+                      <span>Hora: {formattedDate.time}</span>
+                    </div>
+                  </div>
+
+                  <CollapsibleContent className="pt-2">
+                    <ScrollArea className="h-[200px]">
+                      <div className="bg-background/50 rounded-lg p-3 space-y-1">
+                        <p className="text-sm font-medium mb-2 sticky top-0 bg-background/50 backdrop-blur-sm p-2 rounded-t-lg">
+                          Archivos:
+                        </p>
+                        {record.fileNames.map((fileName, index) => (
+                          <p key={index} className="text-sm text-muted-foreground pl-3 py-1 hover:bg-secondary/20 rounded-lg transition-colors">
+                            • {fileName}
+                          </p>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </CollapsibleContent>
+                </Collapsible>
+              )
+            })}
           </div>
 
-          <div className="flex items-start gap-3">
-            <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">
-              2
+          {uploadHistory.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              <History className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>No hay registros de archivos procesados</p>
             </div>
-            <div>
-              <h3 className="font-semibold text-foreground mb-1">Activación</h3>
-              <p className="text-sm text-muted-foreground">Haz clic en el botón para iniciar el proceso en Make</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">
-              3
-            </div>
-            <div>
-              <h3 className="font-semibold text-foreground mb-1">Procesamiento</h3>
-              <p className="text-sm text-muted-foreground">
-                El sistema procesará automáticamente la información contable
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <Button onClick={handleTrigger} disabled={triggering} className="w-full h-14 text-lg font-semibold" size="lg">
-          {triggering ? (
-            <>
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-foreground mr-2" />
-              Activando proceso...
-            </>
-          ) : (
-            <>
-              <Play className="mr-2 h-5 w-5" />
-              Activar Proceso Contable
-            </>
           )}
-        </Button>
+        </ScrollArea>
 
-        {triggerStatus === "success" && (
-          <div className="flex items-center gap-2 text-primary bg-primary/10 p-3 rounded-lg">
-            <CheckCircle2 className="h-5 w-5" />
-            <span className="font-medium">Proceso activado exitosamente</span>
-          </div>
-        )}
-
-        {triggerStatus === "error" && (
-          <div className="flex items-center gap-2 text-destructive bg-destructive/10 p-3 rounded-lg">
-            <AlertCircle className="h-5 w-5" />
-            <span className="font-medium">Error al activar el proceso</span>
-          </div>
-        )}
-
-        <div className="bg-muted/30 rounded-lg p-4 border border-border">
+        <div className="bg-muted/30 rounded-lg p-4 border border-border mt-4">
           <p className="text-sm text-muted-foreground">
-            <strong className="text-foreground">Nota:</strong> Este botón activará el webhook configurado en Make.
-            Asegúrate de tener tu escenario de Make configurado y activo.
+            <strong className="text-foreground">Nota:</strong> Este historial muestra los últimos archivos
+            procesados por el sistema.
           </p>
         </div>
       </CardContent>
