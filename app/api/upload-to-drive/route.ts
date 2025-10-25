@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-const WEBHOOK_URL = "https://hook.us2.make.com/hv6tie5an1bma04wpj0dssc8b13ooeqo"
+const WEBHOOK_URL = "http://localhost:5678/webhook-test/c57ef14e-1211-4d80-84f0-d24019ad0d13"
 
 export async function POST(request: NextRequest) {
   try {
