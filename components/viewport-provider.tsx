@@ -1,6 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useEffect, useState } from "react"
+import { useIsMobile } from '@/hooks/use-mobile'
 
 type ViewportState = {
   width: number
@@ -21,13 +22,16 @@ export function ViewportProvider({
   designWidth?: number
   designHeight?: number
 }) {
+  const isMobile = useIsMobile()
   const [state, setState] = useState({ width: 0, height: 0, scale: 1 })
 
   useEffect(() => {
     function update() {
       const w = window.innerWidth
       const h = window.innerHeight
-      const s = Math.min(w / designWidth, h / designHeight) || 1
+      // Only apply scaling on non-mobile. Treat undefined (SSR/hydration) as "mobile" mode
+      const shouldScale = isMobile === false
+      const s = shouldScale ? (Math.min(w / designWidth, h / designHeight) || 1) : 1
       setState({ width: w, height: h, scale: s })
     }
 
@@ -38,7 +42,7 @@ export function ViewportProvider({
       window.removeEventListener("resize", update)
       window.removeEventListener("orientationchange", update)
     }
-  }, [designWidth, designHeight])
+  }, [designWidth, designHeight, isMobile])
 
   return (
     <ViewportContext.Provider
@@ -50,29 +54,41 @@ export function ViewportProvider({
         designHeight,
       }}
     >
-      <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          overflow: "hidden",
-          // ensure this container doesn't create scrollbars
-        }}
-      >
+      { /* On desktop (isMobile === false) keep the fixed centered scaled canvas.
+           On mobile or while undetermined, render children responsively (no scale). */ }
+      {isMobile === false ? (
         <div
           style={{
-            width: designWidth,
-            height: designHeight,
-            transform: `scale(${state.scale})`,
-            transformOrigin: "center",
-            // prevent inner overflow from affecting outer page
+            position: "fixed",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              width: designWidth,
+              height: designHeight,
+              transform: `scale(${state.scale})`,
+              transformOrigin: "center",
+            }}
+          >
+            {children}
+          </div>
+        </div>
+      ) : (
+        <div
+          style={{
+            width: '100%',
+            minHeight: '100%',
+            boxSizing: 'border-box',
           }}
         >
           {children}
         </div>
-      </div>
+      )}
     </ViewportContext.Provider>
   )
 }
