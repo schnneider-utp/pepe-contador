@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Suspense } from "react"
 import "./globals.css"
+import { ViewportProvider } from "@/components/viewport-provider"
 
 export const metadata: Metadata = {
   title: "Sistema de Gestión - Archivos y Contabilidad",
@@ -24,11 +25,13 @@ export default function RootLayout({
     <html lang="es" suppressHydrationWarning>
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} antialiased`}>
         <ThemeProvider defaultTheme="system" storageKey="theme-preference">
-          <Suspense fallback={null}>
-            {children}
-            <ThemeToggle />
-            <Toaster />
-          </Suspense>
+          <ViewportProvider designWidth={1440} designHeight={900}>
+            <Suspense fallback={null}>
+              {children}
+              <ThemeToggle />
+              <Toaster />
+            </Suspense>
+          </ViewportProvider>
           <Analytics />
         </ThemeProvider>
       </body>

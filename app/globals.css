@@ -128,3 +128,12 @@
     @apply bg-background text-foreground overflow-hidden;
   }
 }
+
+html, body, #__next {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden; /* evitar scrollbar del documento principal; el ViewportProvider se encarga del ajuste */
+}

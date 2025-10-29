@@ -7,7 +7,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
 
-      <main className="flex-1 container mx-auto px-4 py-6 md:py-8 overflow-y-auto">
+      <main className="flex-1 container mx-auto px-4 py-6 md:py-8 overflow-hidden">
         <div className="mb-6 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-3 text-balance">
             Gestión de Archivos y Procesos
