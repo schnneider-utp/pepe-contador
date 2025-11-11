@@ -1,32 +1,125 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { ChatService } from '@/agents/chatbot'
 
 type Message = { id: number; text: string; author: 'yo' | 'sistema' }
 
 export function ChatPanel() {
   const [messages, setMessages] = useState<Message[]>([
-    { id: 1, text: 'Hola, este es tu asistente.', author: 'sistema' },
-    { id: 2, text: 'El chat queda fijo a la izquierda.', author: 'sistema' },
+    { id: 1, text: 'Chat bloqueado. Ingresa tu API key de Google para activar Gemini.', author: 'sistema' },
   ])
   const [input, setInput] = useState('')
+  const [apiKey, setApiKey] = useState('')
+  const [unlocked, setUnlocked] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [editingKey, setEditingKey] = useState(false)
+  const [apiKeyDraft, setApiKeyDraft] = useState('')
+  const serviceRef = useRef<ChatService | null>(null)
 
-  const sendMessage = () => {
-    if (!input.trim()) return
-    setMessages((prev) => [...prev, { id: Date.now(), text: input.trim(), author: 'yo' }])
+  const openEditKey = () => {
+    setApiKeyDraft(apiKey)
+    setEditingKey(true)
+  }
+
+  const saveApiKey = () => {
+    const key = apiKeyDraft.trim()
+    if (!key) {
+      setApiKey('')
+      serviceRef.current = null
+      setUnlocked(false)
+      setEditingKey(false)
+      setMessages((prev) => [
+        ...prev,
+        { id: Date.now(), text: 'API key eliminada. Chat bloqueado.', author: 'sistema' },
+      ])
+      return
+    }
+    try {
+      serviceRef.current = new ChatService({ apiKey: key })
+      setApiKey(key)
+      setUnlocked(true)
+      setEditingKey(false)
+      setMessages((prev) => [
+        ...prev,
+        { id: Date.now(), text: 'API key actualizada. Gemini listo.', author: 'sistema' },
+      ])
+    } catch (err) {
+      setMessages((prev) => [
+        ...prev,
+        { id: Date.now(), text: 'No se pudo guardar la API key. Verifica el valor.', author: 'sistema' },
+      ])
+    }
+  }
+
+  const unlockChat = () => {
+    const key = apiKey.trim()
+    if (!key) return
+    try {
+      serviceRef.current = new ChatService({ apiKey: key })
+      setUnlocked(true)
+      setMessages((prev) => [
+        ...prev,
+        { id: Date.now(), text: 'Gemini activado. Ya puedes chatear conmigo.', author: 'sistema' },
+      ])
+    } catch (err) {
+      setMessages((prev) => [
+        ...prev,
+        { id: Date.now(), text: 'No se pudo activar el chat. Verifica tu API key.', author: 'sistema' },
+      ])
+    }
+  }
+
+  const sendMessage = async () => {
+    if (!input.trim() || !unlocked || !serviceRef.current) return
+    const userText = input.trim()
     setInput('')
+    setMessages((prev) => [...prev, { id: Date.now(), text: userText, author: 'yo' }])
+    setSending(true)
+    try {
+      const reply = await serviceRef.current.send(userText)
+      setMessages((prev) => [...prev, { id: Date.now(), text: reply, author: 'sistema' }])
+    } catch (err) {
+      setMessages((prev) => [
+        ...prev,
+        { id: Date.now(), text: 'Error al consultar Gemini. Revisa tu API key o intenta de nuevo.', author: 'sistema' },
+      ])
+    } finally {
+      setSending(false)
+    }
   }
 
   return (
     <Card className="h-[600px] border-2 flex flex-col">
       <CardHeader>
-        <CardTitle>Chat</CardTitle>
+        <CardTitle>Chat {unlocked ? '(activo)' : '(bloqueado)'}</CardTitle>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col gap-3 min-h-0">
+        {!unlocked ? (
+          <div className="space-y-3">
+            <Input
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              placeholder="Ingresa tu API key de Google (Gemini)"
+            />
+            <Button onClick={unlockChat} disabled={!apiKey.trim()}>Activar chat</Button>
+            <p className="text-xs text-muted-foreground">
+              La clave se usa solo en este navegador para consultas a Gemini.
+            </p>
+            <a
+              href="https://aistudio.google.com/app/apikey"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs underline text-primary"
+            >
+              Obtener API key de Gemini (Google AI Studio)
+            </a>
+          </div>
+        ) : null}
         <ScrollArea className="flex-1 h-full rounded-md border border-border p-3 overflow-y-auto">
           <div className="space-y-3">
             {messages.map((m) => (
@@ -47,10 +140,39 @@ export function ChatPanel() {
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Escribe un mensaje"
+            placeholder={unlocked ? 'Escribe un mensaje' : 'Bloqueado: ingresa API key'}
+            disabled={!unlocked || sending}
           />
-          <Button onClick={sendMessage}>Enviar</Button>
+          <Button onClick={sendMessage} disabled={!unlocked || sending}>Enviar</Button>
         </div>
+        {unlocked ? (
+          <div className="mt-2 space-y-2">
+            {!editingKey ? (
+              <Button variant="outline" size="sm" onClick={openEditKey}>Editar API key</Button>
+            ) : (
+              <div className="space-y-2">
+                <Input
+                  value={apiKeyDraft}
+                  onChange={(e) => setApiKeyDraft(e.target.value)}
+                  placeholder="Editar API key de Google (Gemini)"
+                />
+                <div className="flex gap-2">
+                  <Button onClick={saveApiKey}>Guardar</Button>
+                  <Button variant="secondary" onClick={() => setEditingKey(false)}>Cancelar</Button>
+                  <a
+                    href="https://aistudio.google.com/app/apikey"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs underline text-primary self-center"
+                  >
+                    Obtener API key
+                  </a>
+                </div>
+                <p className="text-xs text-muted-foreground">Puedes actualizar o eliminar la clave para bloquear el chat.</p>
+              </div>
+            )}
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   )

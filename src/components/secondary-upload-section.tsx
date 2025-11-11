@@ -54,9 +54,14 @@ export function SecondaryUploadSection() {
       const formData = new FormData()
       files.forEach((file) => formData.append('files', file))
 
-      const response = await fetch('/api/upload-to-drive', {
+      const response = await fetch('/api/trigger-accounting', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filesCount: files.length,
+          fileNames: files.map((f) => f.name),
+          source: 'secondary-upload-section',
+        }),
       })
 
       const responseData = await response.json()
@@ -66,7 +71,7 @@ export function SecondaryUploadSection() {
       }
 
       const uploadRecord = {
-        folderName: responseData.folderName,
+        folderName: responseData?.folderName ?? 'Webhook Trigger',
         filesCount: files.length,
         timestamp: new Date().toISOString(),
         fileNames: files.map((f) => f.name),
@@ -82,7 +87,7 @@ export function SecondaryUploadSection() {
       setUploadStatus('success')
       toast({
         title: '¡Archivos subidos!',
-        description: `${files.length} archivo(s) subido(s) a la carpeta: ${responseData.folderName}`,
+        description: `${files.length} archivo(s) enviado(s) al proceso contable (webhook activado)`,
       })
 
       resetForm()
