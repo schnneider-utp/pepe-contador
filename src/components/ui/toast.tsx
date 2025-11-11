@@ -11,22 +11,23 @@ export type ToastProps = {
   title?: React.ReactNode
   description?: React.ReactNode
   action?: ToastActionElement
+  variant?: 'default' | 'destructive'
 }
 
 type ToastComponentProps = ToastProps & {
   onClose?: () => void
 }
 
-export function Toast({ title, description, action, onClose }: ToastComponentProps) {
+export function Toast({ title, description, action, onClose, variant = 'default' }: ToastComponentProps) {
+  const containerClass =
+    variant === 'destructive'
+      ? 'pointer-events-auto w-80 rounded-lg border border-destructive/60 bg-destructive/10 shadow-lg'
+      : 'pointer-events-auto w-80 rounded-lg border border-border bg-card shadow-lg'
   return (
-    <div className="pointer-events-auto w-80 rounded-lg border border-border bg-card shadow-lg">
+    <div className={containerClass}>
       <div className="p-4">
-        {title && (
-          <div className="text-sm font-semibold text-foreground">{title}</div>
-        )}
-        {description && (
-          <div className="mt-1 text-sm text-muted-foreground">{description}</div>
-        )}
+        {title && <div className="text-sm font-semibold text-foreground">{title}</div>}
+        {description && <div className="mt-1 text-sm text-muted-foreground">{description}</div>}
         {action && (
           <div className="mt-3">{action}</div>
         )}
