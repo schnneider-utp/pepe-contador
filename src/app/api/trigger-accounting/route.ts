@@ -3,7 +3,7 @@ import { NextResponse } from "next/server"
 export async function POST() {
   try {
     // URL del webhook de Make (usando directamente la URL proporcionada)
-    const makeWebhookUrl = "https://hook.us2.make.com/hv6tie5an1bma04wpj0dssc8b13ooeqo"
+    const makeWebhookUrl = "http://localhost:5678/webhook-test/c57ef14e-1211-4d80-84f0-d24019ad0d13"
 
     // Enviar trigger a Make
     const response = await fetch(makeWebhookUrl, {
