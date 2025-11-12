@@ -1,11 +1,15 @@
 import { Header } from "@/components/header"
 import { ChatPanel } from "@/components/chat"
 import { AppTabsController } from "@/components/app-tabs-controller"
+import { UserRagUploader } from "@/components/user-rag-uploader"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
+      <UserRagUploader />
+      <ThemeToggle />
 
       <main className="flex-1 container mx-auto px-4 py-6 md:py-8 overflow-hidden">
         <div className="mb-6 text-center">
@@ -17,7 +21,7 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-[380px_1fr] gap-6 max-w-7xl mx-auto h-full">
+        <div className="grid lg:grid-cols-[400px_1fr] xl:grid-cols-[500px_1fr] gap-6 max-w-7xl mx-auto h-full">
           <aside className="hidden lg:block h-full">
             <ChatPanel />
           </aside>
