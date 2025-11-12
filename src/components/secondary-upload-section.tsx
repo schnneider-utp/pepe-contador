@@ -110,7 +110,7 @@ export function SecondaryUploadSection() {
   }
 
   return (
-    <Card className="border-2 hover:border-primary/50 transition-colors">
+    <Card id="secondary-upload-section" className="border-2 hover:border-primary/50 transition-colors">
       <CardHeader>
         <div className="flex items-center gap-3 mb-2">
           <div className="p-2 bg-primary/10 rounded-lg">

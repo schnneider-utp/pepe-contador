@@ -1,9 +1,6 @@
-import { FileUploadSection } from "@/components/file-upload-section"
-import { AccountingTriggerSection } from "@/components/accounting-trigger-section"
 import { Header } from "@/components/header"
 import { ChatPanel } from "@/components/chat"
-import { SecondaryUploadSection } from "@/components/secondary-upload-section"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { AppTabsController } from "@/components/app-tabs-controller"
 
 export default function HomePage() {
   return (
@@ -26,24 +23,7 @@ export default function HomePage() {
           </aside>
 
           <section className="h-full flex flex-col overflow-hidden">
-            <Tabs defaultValue="upload" className="flex h-full flex-col">
-              <TabsList className="mb-4 w-full">
-                <TabsTrigger value="upload">Subir Imagenes</TabsTrigger>
-                <TabsTrigger value="upload2">Subir Documentos</TabsTrigger>
-                <TabsTrigger value="historial">Historial</TabsTrigger>
-              </TabsList>
-              <div className="flex-1 overflow-y-auto">
-                <TabsContent value="upload">
-                  <FileUploadSection />
-                </TabsContent>
-                <TabsContent value="upload2">
-                  <SecondaryUploadSection />
-                </TabsContent>
-                <TabsContent value="historial">
-                  <AccountingTriggerSection />
-                </TabsContent>
-              </div>
-            </Tabs>
+            <AppTabsController />
           </section>
         </div>
       </main>

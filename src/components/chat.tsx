@@ -6,12 +6,13 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { ChatService } from '@/agents/chatbot'
+import { handleUserInstruction } from '@/agents/orchestrator'
 
 type Message = { id: number; text: string; author: 'yo' | 'sistema' }
 
 export function ChatPanel() {
   const [messages, setMessages] = useState<Message[]>([
-    { id: 1, text: 'Chat bloqueado. Ingresa tu API key de Google para activar Gemini.', author: 'sistema' },
+    { id: 0, text: 'Chat bloqueado. Ingresa tu API key de Google para activar Gemini.', author: 'sistema' },
   ])
   const [input, setInput] = useState('')
   const [apiKey, setApiKey] = useState('')
@@ -20,6 +21,11 @@ export function ChatPanel() {
   const [editingKey, setEditingKey] = useState(false)
   const [apiKeyDraft, setApiKeyDraft] = useState('')
   const serviceRef = useRef<ChatService | null>(null)
+  const idRef = useRef(0)
+  const nextId = () => {
+    idRef.current += 1
+    return idRef.current
+  }
 
   const openEditKey = () => {
     setApiKeyDraft(apiKey)
@@ -35,7 +41,7 @@ export function ChatPanel() {
       setEditingKey(false)
       setMessages((prev) => [
         ...prev,
-        { id: Date.now(), text: 'API key eliminada. Chat bloqueado.', author: 'sistema' },
+        { id: nextId(), text: 'API key eliminada. Chat bloqueado.', author: 'sistema' },
       ])
       return
     }
@@ -46,12 +52,12 @@ export function ChatPanel() {
       setEditingKey(false)
       setMessages((prev) => [
         ...prev,
-        { id: Date.now(), text: 'API key actualizada. Gemini listo.', author: 'sistema' },
+        { id: nextId(), text: 'API key actualizada. Gemini listo.', author: 'sistema' },
       ])
     } catch (err) {
       setMessages((prev) => [
         ...prev,
-        { id: Date.now(), text: 'No se pudo guardar la API key. Verifica el valor.', author: 'sistema' },
+        { id: nextId(), text: 'No se pudo guardar la API key. Verifica el valor.', author: 'sistema' },
       ])
     }
   }
@@ -64,12 +70,12 @@ export function ChatPanel() {
       setUnlocked(true)
       setMessages((prev) => [
         ...prev,
-        { id: Date.now(), text: 'Gemini activado. Ya puedes chatear conmigo.', author: 'sistema' },
+        { id: nextId(), text: 'Gemini activado. Ya puedes chatear conmigo.', author: 'sistema' },
       ])
     } catch (err) {
       setMessages((prev) => [
         ...prev,
-        { id: Date.now(), text: 'No se pudo activar el chat. Verifica tu API key.', author: 'sistema' },
+        { id: nextId(), text: 'No se pudo activar el chat. Verifica tu API key.', author: 'sistema' },
       ])
     }
   }
@@ -78,15 +84,22 @@ export function ChatPanel() {
     if (!input.trim() || !unlocked || !serviceRef.current) return
     const userText = input.trim()
     setInput('')
-    setMessages((prev) => [...prev, { id: Date.now(), text: userText, author: 'yo' }])
+    setMessages((prev) => [...prev, { id: nextId(), text: userText, author: 'yo' }])
+    const orchestration = handleUserInstruction(userText)
+    if (orchestration.guide) {
+      setMessages((prev) => [
+        ...prev,
+        { id: nextId(), text: orchestration.guide!, author: 'sistema' },
+      ])
+    }
     setSending(true)
     try {
       const reply = await serviceRef.current.send(userText)
-      setMessages((prev) => [...prev, { id: Date.now(), text: reply, author: 'sistema' }])
+      setMessages((prev) => [...prev, { id: nextId(), text: reply, author: 'sistema' }])
     } catch (err) {
       setMessages((prev) => [
         ...prev,
-        { id: Date.now(), text: 'Error al consultar Gemini. Revisa tu API key o intenta de nuevo.', author: 'sistema' },
+        { id: nextId(), text: 'Error al consultar Gemini. Revisa tu API key o intenta de nuevo.', author: 'sistema' },
       ])
     } finally {
       setSending(false)
