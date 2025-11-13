@@ -53,16 +53,13 @@ export function FileUploadSection() {
 
     try {
       const formData = new FormData()
-      files.forEach((file) => formData.append("files", file))
+      files.forEach((file, i) => formData.append(`data${i}`, file, file.name))
+      formData.append("filesCount", String(files.length))
+      formData.append("source", "file-upload-section")
 
       const response = await fetch("/api/trigger-accounting", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          filesCount: files.length,
-          fileNames: files.map((f) => f.name),
-          source: "file-upload-section",
-        }),
+        body: formData,
       })
 
       const responseData = await response.json()

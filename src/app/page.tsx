@@ -11,7 +11,7 @@ export default function HomePage() {
       <UserRagUploader />
       <ThemeToggle />
 
-      <main className="flex-1 container mx-auto px-4 py-6 md:py-8 overflow-hidden">
+      <main className="flex-1 container mx-auto px-4 py-6 md:py-8 overflow-x-hidden overflow-y-auto min-h-0">
         <div className="mb-6 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-3 text-balance">
             Gestión de Archivos y Procesos
@@ -21,12 +21,12 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-[400px_1fr] xl:grid-cols-[500px_1fr] gap-6 max-w-7xl mx-auto h-full">
+        <div className="grid lg:grid-cols-[400px_1fr] xl:grid-cols-[500px_1fr] gap-6 max-w-7xl mx-auto h-full min-h-0">
           <aside className="hidden lg:block h-full">
             <ChatPanel />
           </aside>
 
-          <section className="h-full flex flex-col overflow-hidden">
+          <section className="h-full flex flex-col overflow-x-hidden overflow-y-auto min-h-0">
             <AppTabsController />
           </section>
         </div>
