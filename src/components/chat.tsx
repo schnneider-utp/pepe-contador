@@ -87,11 +87,11 @@ export function ChatPanel() {
     setInput('')
     setMessages((prev) => [...prev, { id: nextId(), text: userText, author: 'yo' }])
     const orchestration = handleUserInstruction(userText)
-    if (orchestration.guide) {
-      setMessages((prev) => [
-        ...prev,
-        { id: nextId(), text: orchestration.guide!, author: 'sistema' },
-      ])
+    if (orchestration.performed?.success) {
+      const label = orchestration.performed.sectionLabel
+      const text = orchestration.guide ?? `Listo. Abriendo ${label}.`
+      setMessages((prev) => [...prev, { id: nextId(), text, author: 'sistema' }])
+      return
     }
     const t = userText.toLowerCase()
     const isGreeting = /(\bhola\b|\bhello\b|\bhi\b|\bbuenas\b|\bbuenos dias\b|\bbuenas tardes\b|\bbuenas noches\b|\bo?ye\b|\bque tal\b|\bqué tal\b)/.test(t)
