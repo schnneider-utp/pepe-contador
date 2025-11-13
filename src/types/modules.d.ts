@@ -1,0 +1,7 @@
+declare module '@langchain/textsplitters'
+declare module 'pdfjs-dist/build/pdf'
+declare module 'pdfjs-dist/legacy/build/pdf'
+declare module 'pdfjs-dist'
+declare module 'pdfjs-dist/build/pdf.js'
+declare module 'pdfjs-dist/legacy/build/pdf.js'
+declare module 'pdfjs-dist/legacy/build/pdf.mjs'
