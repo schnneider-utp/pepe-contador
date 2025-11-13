@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import { ChatService } from '@/agents/chatbot'
 import { handleUserInstruction } from '@/agents/orchestrator'
 
@@ -92,14 +93,26 @@ export function ChatPanel() {
         { id: nextId(), text: orchestration.guide!, author: 'sistema' },
       ])
     }
+    const t = userText.toLowerCase()
+    const isGreeting = /(\bhola\b|\bhello\b|\bhi\b|\bbuenas\b|\bbuenos dias\b|\bbuenas tardes\b|\bbuenas noches\b|\bo?ye\b|\bque tal\b|\bqué tal\b)/.test(t)
+    if (isGreeting) {
+      setMessages((prev) => [...prev, { id: nextId(), text: 'Hola, ¿en qué te puedo ayudar?', author: 'sistema' }])
+      return
+    }
     setSending(true)
     try {
-      const reply = await serviceRef.current.send(userText)
+      const svc = serviceRef.current as any
+      const reply = typeof svc.sendSmart === 'function'
+        ? await svc.sendSmart(userText)
+        : typeof svc.sendRag === 'function'
+          ? await svc.sendRag(userText)
+          : await svc.send(userText)
       setMessages((prev) => [...prev, { id: nextId(), text: reply, author: 'sistema' }])
     } catch (err) {
+      const msg = (err as any)?.message || 'Error al consultar Gemini. Revisa tu API key o intenta de nuevo.'
       setMessages((prev) => [
         ...prev,
-        { id: nextId(), text: 'Error al consultar Gemini. Revisa tu API key o intenta de nuevo.', author: 'sistema' },
+        { id: nextId(), text: msg, author: 'sistema' },
       ])
     } finally {
       setSending(false)
@@ -149,7 +162,7 @@ export function ChatPanel() {
             ))}
           </div>
         </ScrollArea>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -157,6 +170,11 @@ export function ChatPanel() {
             disabled={!unlocked || sending}
           />
           <Button onClick={sendMessage} disabled={!unlocked || sending}>Enviar</Button>
+          {sending ? (
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Spinner className="mr-2" /> Generando...
+            </div>
+          ) : null}
         </div>
         {unlocked ? (
           <div className="mt-2 space-y-2">
