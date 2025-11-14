@@ -166,6 +166,12 @@ export function ChatPanel() {
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                sendMessage()
+              }
+            }}
             placeholder={unlocked ? 'Escribe un mensaje' : 'Bloqueado: ingresa API key'}
             disabled={!unlocked || sending}
           />
