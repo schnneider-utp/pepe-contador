@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { ChatService } from '@/agents/chatbot'
 import { handleUserInstruction } from '@/agents/orchestrator'
+import ReactMarkdown from 'react-markdown'
 
 type Message = { id: number; text: string; author: 'yo' | 'sistema' }
 
@@ -157,7 +158,26 @@ export function ChatPanel() {
                     : 'mr-auto max-w-[85%] rounded-lg bg-muted px-3 py-2 text-foreground'
                 }
               >
-                {m.text}
+                <ReactMarkdown
+                  components={{
+                    p: ({ children }) => <p className="mb-2 leading-relaxed">{children}</p>,
+                    ul: ({ children }) => <ul className="list-disc pl-5 mb-2">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal pl-5 mb-2">{children}</ol>,
+                    li: ({ children }) => <li className="mb-1">{children}</li>,
+                    strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                    h1: ({ children }) => <h1 className="text-lg font-semibold mb-2">{children}</h1>,
+                    h2: ({ children }) => <h2 className="text-base font-semibold mb-2">{children}</h2>,
+                    h3: ({ children }) => <h3 className="text-base font-medium mb-2">{children}</h3>,
+                    blockquote: ({ children }) => (
+                      <blockquote className="border-l-2 pl-3 text-muted-foreground mb-2">{children}</blockquote>
+                    ),
+                    code: ({ children }) => (
+                      <code className="bg-muted px-1 py-0.5 rounded text-sm">{children}</code>
+                    ),
+                  }}
+                >
+                  {m.text}
+                </ReactMarkdown>
               </div>
             ))}
           </div>

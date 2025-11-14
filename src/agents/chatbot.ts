@@ -63,6 +63,11 @@ export class ChatService {
     return /fragmentos usados\s*:/i.test(text)
   }
 
+  private isExplanation(userText: string): boolean {
+    const t = userText.toLowerCase()
+    return /(que es|qué es|definici[oó]n|explica|expl[ií]came|describir|describe)/.test(t)
+  }
+
   async sendSmart(userText: string): Promise<string> {
     const t = userText.toLowerCase()
     const isGreeting = /(\bhola\b|\bhello\b|\bhi\b|\bbuenas\b|\bbuenos dias\b|\bbuenas tardes\b|\bbuenas noches\b|\bo?ye\b|\bque tal\b|\bqué tal\b)/.test(t)
@@ -97,6 +102,13 @@ export class ChatService {
       outbound.push(
         new HumanMessage(
           'Responde de forma concisa y estructurada: máximo 8 viñetas claras, con secciones "Requisitos", "Pasos", "Advertencias" y "Siguientes acciones". Evita saturar al usuario y ofrece ampliar detalles solo si se solicita.'
+        )
+      )
+    }
+    if (this.isExplanation(userText)) {
+      outbound.push(
+        new HumanMessage(
+          'Estructura la respuesta con: una línea de definición y luego 3–5 viñetas con Funciones, Ámbito y Puntos clave. Usa saltos de línea y viñetas.'
         )
       )
     }
@@ -164,6 +176,13 @@ export class ChatService {
         outbound.push(
           new HumanMessage(
             'Responde de forma concisa y estructurada: máximo 8 viñetas claras, con secciones "Requisitos", "Pasos", "Advertencias" y "Siguientes acciones". Usa únicamente los fragmentos citados.'
+          )
+        )
+      }
+      if (this.isExplanation(userText)) {
+        outbound.push(
+          new HumanMessage(
+            'Estructura la respuesta con: una línea de definición y luego 3–5 viñetas con Funciones, Ámbito y Puntos clave. Usa solo el contexto citado.'
           )
         )
       }
