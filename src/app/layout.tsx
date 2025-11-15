@@ -22,6 +22,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" suppressHydrationWarning>
+      <head>
+        <link rel="icon" type="image/png" href="/pepe%20contador.png" />
+      </head>
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} antialiased`}>
         <ThemeProvider defaultTheme="system" storageKey="theme-preference">
           <Suspense fallback={null}>
