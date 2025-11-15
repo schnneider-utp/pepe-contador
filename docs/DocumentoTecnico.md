@@ -203,7 +203,7 @@ Ambos agentes siguen el mismo pipeline:
      según corresponda, junto con el link al archivo en Google Drive.
 
 ---
-# 4.1.1 Flujo n8n por tipo de agente
+## 4.1.1 Flujo n8n por tipo de agente y tipo de archivo (versión final)
 
 ```text
                            ┌────────────────────────────┐
@@ -219,29 +219,40 @@ Ambos agentes siguen el mismo pipeline:
         ┌───────────────────┐                    ┌───────────────────┐
         │  Webhook Gastos   │                    │ Webhook Ingresos  │
         └─────────┬─────────┘                    └─────────┬─────────┘
-                  │   (solo imágenes                           │   (solo PDFs
-                  │    y facturas)                             │    y documentos)
-                  ▼                                            ▼
-        [Google Drive: Upload]                        [Google Drive: Upload]
-                  │                                            │
-                  ▼                                            ▼
-        [Google Drive: Download]                      [Google Drive: Download]
-                  │                                            │
-                  ▼                                            ▼
-        [Extract Text (OCR/Imagen/PDF)]               [Extract Text (PDF)]
-                  │                                            │
-                  ▼                                            ▼
-        [LangChain + Gemini (Gastos)]                 [LangChain + Gemini (Ingresos)]
-                  │                                            │
-                  ▼                                            ▼
-        [JS: Clean Total / Normalizar]                [JS: Clean Total / Normalizar]
-                  │                                            │
-                  ▼                                            ▼
-        [Google Sheets: Append Row                    [Google Sheets: Append Row
-         (Hoja: Gastos)]                               (Hoja: Ingresos)]
-                  │                                            │
-                  └────────────────────────────────────────────┘
-                                   FIN DEL PROCESO
+                  │                                         │
+                  │  (Ambos reciben PDF, imágenes,          │
+                  │   facturas y documentos)                │
+                  ▼                                         ▼
+        [Google Drive: Upload]                      [Google Drive: Upload]
+                  │                                         │
+                  ▼                                         ▼
+        [Google Drive: Download]                    [Google Drive: Download]
+                  │                                         │
+                  ▼                                         ▼
+         [Detección del tipo de archivo]           [Detección del tipo de archivo]
+                  │                                         │
+        ┌─────────┴─────────┐                      ┌─────────┴──────────┐
+        │                   │                      │                    │
+        │                   │                      │                    │
+ [Si es PDF/Documento] [Si es Imagen]      [Si es PDF/Documento] [Si es Imagen]
+        │                   │                      │                    │
+        ▼                   ▼                      ▼                    ▼
+[Extract Text (PDF)]  [LangChain + Gemini     [Extract Text (PDF)]  [LangChain + Gemini
+                       (Prompt Gastos)]                             (Prompt Ingresos)]
+        │                   │                      │                    │
+        ▼                   ▼                      ▼                    ▼
+[LangChain + Gemini   [JS: Clean Total]     [LangChain + Gemini   [JS: Clean Total]
+ (Prompt Gastos)]                              (Prompt Ingresos)]
+        │                   │                      │                    │
+        ▼                   ▼                      ▼                    ▼
+[JS: Clean Total]   [Google Sheets: Gastos]   [JS: Clean Total]   [Google Sheets: Ingresos]
+        │                                                │
+        ▼                                                ▼
+[Google Sheets: Gastos]                          [Google Sheets: Ingresos]
+        │                                                │
+        └────────────────────────────────────────────────┘
+                            FIN DEL PROCESO
+
 ```
 
 ---
