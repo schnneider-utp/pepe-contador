@@ -203,37 +203,50 @@ Ambos agentes siguen el mismo pipeline:
      según corresponda, junto con el link al archivo en Google Drive.
 
 ---
+# 4.1.1 Flujo n8n por tipo de agente
 
-## **4.1.1 Diagrama del flujo n8n (Gastos e Ingresos)**
-
-```
-[Webhook (Next.js)]
-        │
-        ▼
-[Google Drive: Upload]
-        │
-        ▼
-[Google Drive: Download]
-        │
-        ▼
-[Extract Text (PDF/Image)]
-        │
-        ▼
-[LangChain + Gemini]
-        │
-        ▼
-[JS: Clean Total]
-        │
-        ▼
-[Google Sheets: Append Row]
-        │
-        ▼
-     FIN
+```text
+                           ┌────────────────────────────┐
+                           │          Usuario           │
+                           └─────────────┬──────────────┘
+                                         │
+                           [Next.js: Selección de tipo]
+                                         │
+                     ┌───────────────────┴───────────────────┐
+                     │                                       │
+                     │                                       │
+             (GASTOS) ▼                               (INGRESOS) ▼
+        ┌───────────────────┐                    ┌───────────────────┐
+        │  Webhook Gastos   │                    │ Webhook Ingresos  │
+        └─────────┬─────────┘                    └─────────┬─────────┘
+                  │   (solo imágenes                           │   (solo PDFs
+                  │    y facturas)                             │    y documentos)
+                  ▼                                            ▼
+        [Google Drive: Upload]                        [Google Drive: Upload]
+                  │                                            │
+                  ▼                                            ▼
+        [Google Drive: Download]                      [Google Drive: Download]
+                  │                                            │
+                  ▼                                            ▼
+        [Extract Text (OCR/Imagen/PDF)]               [Extract Text (PDF)]
+                  │                                            │
+                  ▼                                            ▼
+        [LangChain + Gemini (Gastos)]                 [LangChain + Gemini (Ingresos)]
+                  │                                            │
+                  ▼                                            ▼
+        [JS: Clean Total / Normalizar]                [JS: Clean Total / Normalizar]
+                  │                                            │
+                  ▼                                            ▼
+        [Google Sheets: Append Row                    [Google Sheets: Append Row
+         (Hoja: Gastos)]                               (Hoja: Ingresos)]
+                  │                                            │
+                  └────────────────────────────────────────────┘
+                                   FIN DEL PROCESO
 ```
 
 ---
 
-## **4.1.2 Cisualizacion de agentes en n8n**
+## **4.1.2 Visualizacion de agentes en n8n**
 
 
 ### **Agente de Gastos – n8n**
