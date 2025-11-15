@@ -375,30 +375,104 @@ Supabase funciona como base de datos vectorial para consultas posteriores.
 
 ---
 
-#  **5. Resultados y conclusiones**
+
+# **5. Resultados y conclusiones**
 
 ## **Resultados logrados**
 
-* Sistema completamente funcional desde carga → extracción → registro.
-* Integración real con:
+Durante el desarrollo del proyecto se obtuvieron resultados significativos tanto a nivel funcional como técnico, permitiendo validar la eficiencia del enfoque multiagente y del uso de IA generativa dentro de procesos contables reales.
 
-  * Google Drive
-  * Google Sheets
-  * Supabase
-  * Gemini
-  * n8n
-* Historial visual de archivos procesados.
-* Sistema RAG operativo para consultas inteligentes.
-* Cargador con barra de progreso y vista previa.
+### **1. Automatización completa del procesamiento de documentos contables**
+
+El sistema logró procesar facturas, recibos e imágenes de forma automática sin intervención manual. Tanto el agente de **Gastos** como el de **Ingresos** completaron satisfactoriamente su ciclo:
+
+* recepción de archivos,
+* extracción de texto,
+* análisis semántico con Gemini,
+* limpieza de campos sensibles como totales,
+* y registro estructurado en Google Sheets.
+
+Esto demuestra que los flujos diseñados son robustos y escalables.
+
+### **2. Integración sólida entre servicios heterogéneos**
+
+Se obtuvo una integración estable entre tecnologías muy distintas: Next.js, n8n, Google Drive, Google Sheets, Supabase, LangChain y Gemini.
+Pese a tratarse de un ecosistema variado, la comunicación entre sistemas funcionó sin inconsistencias en pruebas de carga pequeñas y medianas.
+
+### **3. Precisión alta en la extracción de datos**
+
+Gemini, reforzado con prompts contables específicos, logró:
+
+* identificar correctamente campos clave (fecha, emisor, total, concepto, impuestos),
+* interpretar formatos distintos de facturas,
+* y normalizar montos incluso cuando venían con diferentes estilos (puntos, comas, separadores).
+
+Esto redujo casi por completo los errores humanos típicos al transcribir información.
+
+### **4. Sistema RAG funcional para consultas avanzadas**
+
+El módulo de consulta mediante embeddings ofreció resultados satisfactorios:
+
+* Los documentos fueron divididos, vectorizados y almacenados con éxito.
+* Los embeddings generados con Google Gemini presentaron coherencia y buena recuperación semántica.
+* La estructura del backend permitió realizar preguntas complejas basadas en contenido específico de los documentos subidos.
+
+Esto demuestra que el sistema puede ser extendido como asistente contable cognitivo.
+
+### **5. Interfaz de usuario completa y clara**
+
+La interfaz desarrollada en Next.js permitió:
+
+* subir archivos de forma intuitiva,
+* visualizar la previsualización de PDFs,
+* activar el chat solo con API key del usuario,
+* cargar documentos al RAG con barra de progreso,
+* y consultar un historial de archivos procesados.
+
+Este diseño apoyó la experiencia del usuario y facilitó la validación de las funcionalidades.
+
+### **6. Historial de documentos procesados**
+
+La inclusión del historial permitió:
+
+* rastrear cada documento enviado,
+* identificar si fue clasificado como gasto o ingreso,
+* revisar el estado de su procesamiento,
+* y auditar lo enviado sin revisar manualmente Drive o Sheets.
+
+En general, fue clave para la transparencia del sistema.
 
 ---
 
 ## **Conclusiones**
 
-* La IA generativa puede automatizar tareas contables de forma confiable.
-* n8n facilita la construcción de agentes empresariales reales.
-* El uso de chunking + embeddings mejora drásticamente la calidad de las respuestas del asistente.
-* El historial permite transparencia y trazabilidad.
+### **1. La IA generativa es apta para automatizar procesos contables reales**
+
+El proyecto demuestra que modelos como Gemini pueden interpretar facturas reales con alta precisión. Los agentes pudieron entender diferentes formatos, terminologías y estilos de facturación, procesando información clave con errores mínimos.
+
+### **2. La arquitectura multiagente simplifica problemas complejos**
+
+Separar el flujo en dos agentes especializados (Gastos e Ingresos) permitió repartir la carga y mejorar la mantenibilidad del sistema. Cada agente opera de forma independiente, pero ambos alimentan el mismo entorno contable.
+
+Este enfoque modular facilita la escalabilidad futura.
+
+### **3. El uso de n8n reduce enormemente el tiempo de implementación**
+
+Gracias a n8n se logró automatizar procesos que requerirían mucho código manual. La plataforma permitió crear flujos visuales, fáciles de depurar y modificar, acelerando el desarrollo y facilitando la integración de APIs externas.
+
+### **4. LangChain + Supabase permiten crear un sistema RAG robusto**
+
+El pipeline de chunking, embeddings y almacenamiento vectorial funcionó correctamente, logrando consultas semánticas relevantes para información interna de documentos.
+
+Esto convierte al asistente en algo más que un registrador automático: lo acerca a un **analista contable inteligente**.
+
+### **5. La integración de múltiples servicios demuestra un diseño escalable**
+
+El proyecto combina correctamente frontend, IA, automatización y bases de datos, mostrando que un sistema pequeño puede crecer a una solución empresarial en el futuro.
+
+### **6. El sistema puede utilizarse en entornos reales con pocas modificaciones**
+
+El nivel de precisión y estabilidad alcanzado indica que, con mejoras menores en OCR y seguridad, este sistema podría ser utilizado por pequeñas empresas o independientes para llevar control automatizado de facturación y documentos contables.
 
 ---
 
