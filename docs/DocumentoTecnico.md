@@ -478,11 +478,9 @@ El nivel de precisión y estabilidad alcanzado indica que, con mejoras menores e
 
 #  **6. Trabajo futuro**
 
-* Añadir autenticación de usuarios.
 * Panel de estadísticas (gastos/ingresos por mes).
 * Notificaciones por correo cuando el archivo sea procesado.
 * OCR avanzado para facturas borrosas.
-* Integración del RAG con el chat contable.
 * Exportación mensual automática en PDF.
 * Modo multiempresa.
 
