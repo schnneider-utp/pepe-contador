@@ -1,0 +1,406 @@
+{
+  "name": "Agente contable GASTOS",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "c57ef14e-1211-4d80-84f0-d24019ad0d13",
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -128,
+        48
+      ],
+      "id": "73bd5995-0dd7-45bc-a350-77e6af566349",
+      "name": "Webhook",
+      "webhookId": "c57ef14e-1211-4d80-84f0-d24019ad0d13"
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "data0",
+        "name": "brev",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1Q7-yb6iqSIl0u3ioJ3M2_iOEiTxx32bT",
+          "mode": "list",
+          "cachedResultName": "CONTABILIDAD IA",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1Q7-yb6iqSIl0u3ioJ3M2_iOEiTxx32bT"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        64,
+        48
+      ],
+      "id": "6e77ebcf-2a86-4a5f-87f3-081a5ca47a8d",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "vPo2LPMsDmf8pWhm",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        256,
+        48
+      ],
+      "id": "220bea05-3e19-4de6-9aa2-a4199ea68060",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "vPo2LPMsDmf8pWhm",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Eres un experto contable profesional. Analiza esta factura {{ $json.text }} o de esta imagen {{ $('If').item.json.mimeType  }} y responde {\\\"Fecha\\\":\\\"\\\", \\\"Número\\\":\\\"\\\", \\\"Emisor\\\":\\\"\\\", \\\"RUC\\\":\\\"\\\", \\\"Total\\\":\\\"\\\", \\\"Impuestos\\\":\\\"\\\"}. Si no encuentras un dato, usa 'No encontrado'.\" y esto lo vas a hacer en formato de peso colombiano, de paso necesito que me lo entregres en texto no json, y no quiero absolutamente nada que no sea la propia informacion que te pido, nada mas.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1024,
+        48
+      ],
+      "id": "557753b3-b6ce-4f70-92f5-984db17fae52",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        288
+      ],
+      "id": "97393bf6-bcef-40c7-8dc1-9290e4b1d247",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "zUilwUhbpCWRh7z2",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1yZDscMYNTo-21-sp6VLVBujOpeC93RsUOiD51gP_wwI",
+          "mode": "list",
+          "cachedResultName": "Cal AI ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yZDscMYNTo-21-sp6VLVBujOpeC93RsUOiD51gP_wwI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Gastos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yZDscMYNTo-21-sp6VLVBujOpeC93RsUOiD51gP_wwI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "total": "={{ $json.Total }}",
+            "link": "={{ $('Download file').item.json.webViewLink }}",
+            "descripcion": "={{ $('AI Agent').item.json.output }}"
+          },
+          "matchingColumns": [
+            "total"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "descripcion",
+              "displayName": "descripcion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "total",
+              "displayName": "total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "link",
+              "displayName": "link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1536,
+        48
+      ],
+      "id": "8222771f-6ddc-4393-a771-2467403473a0",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "uHDmLwqFh8vrUPrN",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const texto = ($input.first().json.output ?? '').toString();\n\nconst m = texto.match(/Total[^0-9]*([\\d.,\\s]+)/i);\n\nfunction parseAmountCop(s) {\n  s = String(s).trim().replace(/\\s+/g, '');\n\n  const hasComma = s.includes(',');\n  const hasDot = s.includes('.');\n\n  if (hasComma && hasDot) {\n    const lastComma = s.lastIndexOf(',');\n    const lastDot = s.lastIndexOf('.');\n    const decimalSep = lastComma > lastDot ? ',' : '.';\n    if (decimalSep === ',') {\n      // Miles con punto, decimales con coma → normalizar\n      s = s.replace(/\\./g, '').replace(',', '.');\n    } else {\n      // Miles con coma, decimales con punto → normalizar\n      s = s.replace(/,/g, '');\n    }\n    return { num: Number(s), raw: s };\n  }\n\n  if (hasComma && !hasDot) {\n    const parts = s.split(',');\n    const last = parts[parts.length - 1];\n    if (parts.length === 2 && last.length <= 2) {\n      // Coma decimal, puntos de miles ausentes\n      s = parts[0].replace(/\\./g, '') + '.' + last;\n      return { num: Number(s), raw: s };\n    } else {\n      // Comas como miles (estilo en-US) → quitar comas\n      s = s.replace(/,/g, '');\n      return { num: Number(s), raw: s };\n    }\n  }\n\n  if (hasDot && !hasComma) {\n    const parts = s.split('.');\n    const last = parts[parts.length - 1];\n    if (parts.length > 1 && last.length === 3) {\n      // Puntos como miles (estilo es-CO)\n      s = s.replace(/\\./g, '');\n      return { num: Number(s), raw: s };\n    } else if (parts.length === 2 && last.length <= 2) {\n      // Punto decimal\n      s = s.replace(/,/g, '');\n      return { num: Number(s), raw: s };\n    } else {\n      // Ambiguo: asumir miles\n      s = s.replace(/\\./g, '');\n      return { num: Number(s), raw: s };\n    }\n  }\n\n  // Solo dígitos\n  return { num: Number(s), raw: s };\n}\n\nfunction formatCOP(n) {\n  // Formatea miles con punto y decimales con coma (2 decimales)\n  const intPart = Math.trunc(n);\n  const decPart = Math.round((n - intPart) * 100);\n  const intStr = intPart.toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n  const decStr = decPart.toString().padStart(2, '0');\n  return `$ COP ${intStr},${decStr}`;\n}\n\nconst res = m ? parseAmountCop(m[1]) : null;\n\nreturn [{\n  json: {\n    Total: res ? res.num : 'No encontrado',\n    TotalTextoCOP: res ? formatCOP(res.num) : 'No encontrado'\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        48
+      ],
+      "id": "36992128-3f9d-4cf2-a504-83466bbf8a30",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        608,
+        -160
+      ],
+      "id": "58685af9-3348-4c96-9c32-3d0e330e2942",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        800,
+        48
+      ],
+      "id": "1bbcfe7e-0ac4-4259-b0b2-200414a6d8ab",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a3b6faf7-214f-4bce-b6a6-ca159956794f",
+              "leftValue": "={{$json.mimeType}}",
+              "rightValue": "application/pdf",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "f85c7bd8-dd0f-4364-aeff-be04416e714c",
+              "leftValue": "={{$json.name.toLowerCase()}}",
+              "rightValue": ".pdf",
+              "operator": {
+                "type": "string",
+                "operation": "endsWith"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        48
+      ],
+      "id": "2c790c79-4cd9-4ed4-bc2d-a6302bdf29ae",
+      "name": "If"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c092fc0a-e81c-45ca-aadd-25aaeee4b668",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fb67be8ed13bc7be75ef2af2e989235a9b59d5ae5292a0224f51a4743ab1a95b"
+  },
+  "id": "ir5DN1Bhc1GQyO19",
+  "tags": []
+}
