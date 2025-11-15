@@ -57,8 +57,17 @@ export function FileUploadSection() {
       formData.append("filesCount", String(files.length))
       formData.append("source", "file-upload-section")
 
+      let webhookUrl = ""
+      try {
+        webhookUrl = (process.env.NEXT_PUBLIC_MAKE_WEBHOOK_GASTOS_URL as string) || localStorage.getItem('webhookGastosUrl') || ""
+      } catch {}
+      if (webhookUrl) {
+        formData.append('webhookUrl', webhookUrl)
+      }
+
       const response = await fetch("/api/trigger-gastos", {
         method: "POST",
+        headers: webhookUrl ? { 'x-webhook-url': webhookUrl } : undefined,
         body: formData,
       })
 
