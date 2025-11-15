@@ -29,12 +29,12 @@ Next.js · TypeScript · Supabase · LangChain · Google Gemini · n8n · Google
 
 # **Contenido**
 
-1. [Introducción](#-1-introducción)
-2. [Problema a resolver](#-2-problema-a-resolver)
-3. [Metodología](#-3-metodología)
-4. [Arquitectura de agentes](#-4-arquitectura-de-agentes)
-5. [Resultados y conclusiones](#-5-resultados-y-conclusiones)
-6. [Trabajo futuro](#-6-trabajo-futuro)
+1. [Introducción](#1-introducción)
+2. [Problema a resolver](#2-problema-a-resolver)
+3. [Metodología](#3-metodología)
+4. [Arquitectura de agentes](#4-arquitectura-de-agentes)
+5. [Resultados y conclusiones](#5-resultados-y-conclusiones)
+6. [Trabajo futuro](#6-trabajo-futuro)
 
 ---
 
