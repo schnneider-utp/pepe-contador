@@ -4,7 +4,7 @@ import type React from 'react'
 import { useState, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Upload, FolderOpen, CheckCircle2, AlertCircle } from 'lucide-react'
+import { Upload, FolderOpen, CheckCircle2, AlertCircle, ExternalLink } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
 export function SecondaryUploadSection() {
@@ -56,7 +56,7 @@ export function SecondaryUploadSection() {
       formData.append('filesCount', String(files.length))
       formData.append('source', 'secondary-upload-section')
 
-      const response = await fetch('/api/trigger-accounting', {
+      const response = await fetch('/api/trigger-ingresos', {
         method: 'POST',
         body: formData,
       })
@@ -113,10 +113,10 @@ export function SecondaryUploadSection() {
           <div className="p-2 bg-primary/10 rounded-lg">
             <Upload className="h-6 w-6 text-primary" />
           </div>
-          <CardTitle className="text-2xl">Subir Documentos</CardTitle>
+          <CardTitle className="text-2xl">Subir Ingresos</CardTitle>
         </div>
         <CardDescription className="text-base">
-          Sube documentos al mismo flujo, desde un panel alterno
+          Sube tus ingresos (documentos/PDF). Se enviarán a Google Drive y se analizarán para extraer los datos.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -148,7 +148,12 @@ export function SecondaryUploadSection() {
           </div>
         )}
 
-        <Button onClick={handleUpload} disabled={uploading || files.length === 0} className="w-full h-12 text-lg font-semibold" size="lg">
+        <Button
+          onClick={handleUpload}
+          disabled={uploading || files.length === 0}
+          className="w-full h-12 text-lg font-semibold"
+          size="lg"
+        >
           {uploading ? (
             <>
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-foreground mr-2" />
@@ -175,6 +180,21 @@ export function SecondaryUploadSection() {
             <span className="font-medium">Error al subir archivos</span>
           </div>
         )}
+
+        <div className="bg-muted/30 rounded-lg p-4 border border-border mt-4">
+          <p className="text-sm text-muted-foreground">
+            <strong className="text-foreground">Nota:</strong>  Este botón activará el webhook configurado en n8n. Asegúrate de tener tu escenario de Make configurado y activo.
+          </p>
+        </div>
+
+        <Button
+          variant="outline"
+          className="w-full flex items-center justify-center gap-2"
+          onClick={() => window.open('https://docs.google.com/spreadsheets/d/1Yl2qDkoUw4Q5zYv3RCXt8Cys3_UVtBuGQDCA309XAAA/edit?usp=drive_link', '_blank')}
+        >
+          <ExternalLink className="h-4 w-4" />
+          Ver en Google Sheets
+        </Button>
       </CardContent>
     </Card>
   )

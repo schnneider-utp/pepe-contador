@@ -7,8 +7,8 @@ const TAB_VALUES: Record<UiAction, string> = {
 };
 
 const TAB_LABELS: Record<UiAction, string> = {
-  file_upload: "Subir Imagenes",
-  secondary_upload: "Subir Documentos",
+  file_upload: "Subir Gastos",
+  secondary_upload: "Subir Ingresos",
   history: "Historial",
 };
 

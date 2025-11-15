@@ -15,9 +15,11 @@ const FILE_UPLOAD_KEYWORDS = [
   "imagenes",
   "foto",
   "fotos",
+  "gasto",
+  "gastos",
 ];
 
-const DOC_UPLOAD_KEYWORDS = ["documento", "documentos", "doc", "docs", "pdf"];
+const DOC_UPLOAD_KEYWORDS = ["documento", "documentos", "doc", "docs", "pdf", "ingreso", "ingresos"];
 
 const HISTORY_KEYWORDS = [
   "historial",
@@ -46,7 +48,7 @@ export function detectIntent(message: string): IntentResult {
     return {
       action: "file_upload",
       guide:
-        "Te llevo a la sección para subir imágenes o facturas. Sigue los pasos para seleccionar y subir tus archivos.",
+        "Listo. Abriendo la sección para subir gastos (imágenes/facturas).",
     };
   }
 
@@ -54,7 +56,7 @@ export function detectIntent(message: string): IntentResult {
     return {
       action: "secondary_upload",
       guide:
-        "Te llevo a la sección para subir documentos. Usa el selector para elegir tus archivos y confirmar la subida.",
+        "Listo. Abriendo la sección para subir ingresos (documentos/PDF).",
     };
   }
 

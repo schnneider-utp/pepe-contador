@@ -57,7 +57,7 @@ export function FileUploadSection() {
       formData.append("filesCount", String(files.length))
       formData.append("source", "file-upload-section")
 
-      const response = await fetch("/api/trigger-accounting", {
+      const response = await fetch("/api/trigger-gastos", {
         method: "POST",
         body: formData,
       })
@@ -116,10 +116,10 @@ export function FileUploadSection() {
           <div className="p-2 bg-primary/10 rounded-lg">
             <Upload className="h-6 w-6 text-primary" />
           </div>
-          <CardTitle className="text-2xl">Subir Imagenes</CardTitle>
+          <CardTitle className="text-2xl">Subir Gastos</CardTitle>
         </div>
         <CardDescription className="text-base">
-          Las imagenes se enviaran a google drive y seran analisados para extraer los datos de ellas
+          Sube tus gastos (imágenes/facturas). Se enviarán a Google Drive y se analizarán para extraer los datos.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

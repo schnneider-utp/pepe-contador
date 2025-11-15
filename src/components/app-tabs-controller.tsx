@@ -22,8 +22,8 @@ export function AppTabsController() {
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="flex h-full flex-col">
       <TabsList className="mb-4 w-full">
-        <TabsTrigger value="upload">Subir Imagenes</TabsTrigger>
-        <TabsTrigger value="upload2">Subir Documentos</TabsTrigger>
+        <TabsTrigger value="upload">Subir Gastos</TabsTrigger>
+        <TabsTrigger value="upload2">Subir Ingresos</TabsTrigger>
         <TabsTrigger value="historial">Historial</TabsTrigger>
       </TabsList>
       <div className="flex-1 overflow-y-auto">
