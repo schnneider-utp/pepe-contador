@@ -29,6 +29,35 @@
 
 Aplicación web para: subir archivos a Google Drive, activar procesos contables vía webhooks, gestionar un chat contable con IA y usar RAG sobre documentos subidos.
 
+## 👥 Desarrolladores
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/schnneider-utp" target="_blank">
+        <img src="https://github.com/schnneider-utp.png" width="80" style="border-radius:50%;" />
+        <br/>
+        <sub><b>Jean Schnneider Arias Suarez</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/JuanesUTP" target="_blank">
+        <img src="https://github.com/JuanesUTP.png" width="80" style="border-radius:50%;" />
+        <br/>
+        <sub><b>Juan Esteban Jaramillo Cano</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/wolsybl" target="_blank">
+        <img src="https://github.com/wolsybl.png" width="80" style="border-radius:50%;" />
+        <br/>
+        <sub><b>Wilson Andres Henao Soto</b></sub>
+      </a>
+    </td>
+  </tr>
+</table>
+
+
 ## Stack Tecnológico
 - Framework: Next.js 15, React 19, TypeScript
 - UI: Radix UI, Tailwind CSS
