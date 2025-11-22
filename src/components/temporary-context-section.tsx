@@ -30,7 +30,6 @@ export function TemporaryContextSection() {
         setProgress('Extrayendo texto...')
 
         try {
-            // Extraer texto del archivo
             let text: string
             if (file.type === 'application/pdf') {
                 const r = await readPdfText(file)
@@ -53,24 +52,15 @@ export function TemporaryContextSection() {
             }
 
             setProgress('Dividiendo en fragmentos...')
-
-            // Dividir en chunks
             const { RecursiveCharacterTextSplitter }: any = await import('@langchain/textsplitters')
             const splitter = new RecursiveCharacterTextSplitter({ chunkSize: 1200, chunkOverlap: 200 })
             const parts: string[] = await splitter.splitText(text)
 
             setProgress(`Generando embeddings (${parts.length} fragmentos)...`)
-
-            // Generar embeddings
             const embeddings = new GoogleGenerativeAIEmbeddings({ apiKey, model: 'text-embedding-004' })
             const vectors: number[][] = await embeddings.embedDocuments(parts)
 
-            // Crear documento temporal
-            const chunks = parts.map((content, i) => ({
-                content,
-                embedding: vectors[i],
-            }))
-
+            const chunks = parts.map((content, i) => ({ content, embedding: vectors[i] }))
             const doc = {
                 id: crypto.randomUUID(),
                 title: title.trim(),
@@ -80,13 +70,10 @@ export function TemporaryContextSection() {
             }
 
             addDocument(doc)
-
-            // Limpiar formulario
             setFile(null)
             setTitle('')
             setProgress(null)
 
-            // Limpiar el input de archivos
             const fileInput = document.getElementById('temp-file-upload') as HTMLInputElement
             if (fileInput) fileInput.value = ''
         } catch (err) {
@@ -121,143 +108,93 @@ export function TemporaryContextSection() {
                     </div>
                 </div>
                 <CardDescription className="text-base">
-                    Sube documentos temporales (PDF, Excel, TXT, MD) para proporcionar contexto al chat. Los documentos se mantienen solo durante esta sesión.
+                    Sube documentos temporales (PDF, Excel, TXT, MD) para proporcionar contexto al chat.
                 </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-                {/* Lista de documentos activos */}
-                {documents.length > 0 && (
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                            <Label className="text-base font-semibold">Documentos Activos</Label>
-                            <Button variant="outline" size="sm" onClick={clearAll} className="gap-2">
-                                <Trash2 className="size-4" />
-                                Limpiar todo
-                            </Button>
-                        </div>
-                        <div className="space-y-2">
-                            {documents.map((doc) => (
-                                <div
-                                    key={doc.id}
-                                    className="flex items-center justify-between gap-3 rounded-lg bg-secondary/30 p-4 border border-border hover:border-primary/50 transition-colors"
-                                >
-                                    <div className="flex-1 min-w-0">
-                                        <div className="font-medium text-foreground mb-1">{doc.title}</div>
-                                        <div className="text-sm text-muted-foreground">
-                                            {doc.filename} • {doc.chunks.length} fragmentos
-                                        </div>
-                                    </div>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="shrink-0 hover:bg-destructive/10 hover:text-destructive"
-                                        onClick={() => removeDocument(doc.id)}
-                                    >
-                                        <X className="size-5" />
+            <CardContent>
+                <ScrollArea className="h-[400px] pr-4">
+                    <div className="space-y-6">
+                        {documents.length > 0 && (
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <Label className="text-base font-semibold">Documentos Activos</Label>
+                                    <Button variant="outline" size="sm" onClick={clearAll} className="gap-2">
+                                        <Trash2 className="size-4" />
+                                        Limpiar todo
                                     </Button>
                                 </div>
-                            ))}
+                                <div className="space-y-2">
+                                    {documents.map((doc) => (
+                                        <div key={doc.id} className="flex items-center justify-between gap-3 rounded-lg bg-secondary/30 p-3 border border-border hover:border-primary/50 transition-colors">
+                                            <div className="flex-1 min-w-0">
+                                                <div className="font-medium text-foreground text-sm">{doc.title}</div>
+                                                <div className="text-xs text-muted-foreground">{doc.filename} • {doc.chunks.length} fragmentos</div>
+                                            </div>
+                                            <Button variant="ghost" size="icon" className="size-8 shrink-0 hover:bg-destructive/10 hover:text-destructive" onClick={() => removeDocument(doc.id)}>
+                                                <X className="size-4" />
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="space-y-3 pt-4 border-t">
+                            <Label className="text-base font-semibold">Agregar Nuevo Documento</Label>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="temp-api-key" className="text-xs">Google API Key</Label>
+                                <Input id="temp-api-key" type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder="Ingresa tu API key" disabled={uploading} className="h-9" />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="temp-title" className="text-xs">Título del Documento</Label>
+                                <Input id="temp-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ej: Manual de Contabilidad 2024" disabled={uploading || !apiKey.trim()} className="h-9" />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="temp-file-upload" className="text-xs">Archivo (PDF, Excel, TXT, MD)</Label>
+                                <Input id="temp-file-upload" type="file" accept="text/plain,text/markdown,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,.xlsx,.xls" onChange={onFileChange} disabled={uploading || !title.trim() || !apiKey.trim()} className="h-9" />
+                                {file && <div className="text-xs text-muted-foreground bg-muted/30 rounded p-2">📄 {file.name} • {(file.size / 1024).toFixed(1)} KB</div>}
+                            </div>
+
+                            {error && (
+                                <Alert variant="destructive" className="py-2">
+                                    <AlertCircle className="size-4" />
+                                    <AlertDescription className="text-xs">{error}</AlertDescription>
+                                </Alert>
+                            )}
+
+                            {progress && (
+                                <div className="bg-primary/10 rounded-lg p-2 border border-primary/20">
+                                    <div className="text-xs text-primary animate-pulse font-medium">{progress}</div>
+                                </div>
+                            )}
+
+                            <Button onClick={handleUpload} disabled={!canUpload} className="w-full h-10" size="sm">
+                                {uploading ? (
+                                    <>
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground mr-2" />
+                                        Procesando...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Upload className="size-4 mr-2" />
+                                        Subir Documento
+                                    </>
+                                )}
+                            </Button>
                         </div>
-                    </div>
-                )}
 
-                {/* Formulario de subida */}
-                <div className="space-y-4 pt-4 border-t">
-                    <Label className="text-base font-semibold">Agregar Nuevo Documento</Label>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="temp-api-key" className="text-sm">
-                            Google API Key
-                        </Label>
-                        <Input
-                            id="temp-api-key"
-                            type="password"
-                            value={apiKey}
-                            onChange={(e) => setApiKey(e.target.value)}
-                            placeholder="Ingresa tu API key de Google (Gemini)"
-                            disabled={uploading}
-                        />
-                        <p className="text-xs text-muted-foreground">
-                            Se usa solo para generar embeddings. No se almacena.
-                        </p>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="temp-title" className="text-sm">
-                            Título del Documento
-                        </Label>
-                        <Input
-                            id="temp-title"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            placeholder="Ej: Manual de Contabilidad 2024"
-                            disabled={uploading || !apiKey.trim()}
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="temp-file-upload" className="text-sm">
-                            Archivo
-                        </Label>
-                        <Input
-                            id="temp-file-upload"
-                            type="file"
-                            accept="text/plain,text/markdown,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,.xlsx,.xls"
-                            onChange={onFileChange}
-                            disabled={uploading || !title.trim() || !apiKey.trim()}
-                        />
-                        {file && (
-                            <div className="text-sm text-muted-foreground bg-muted/30 rounded p-2">
-                                📄 {file.name} • {(file.size / 1024).toFixed(1)} KB
+                        {documents.length === 0 && (
+                            <div className="bg-muted/30 rounded-lg p-6 border border-border text-center">
+                                <FileText className="size-10 mx-auto mb-2 text-muted-foreground" />
+                                <p className="text-sm font-medium text-foreground mb-1">No hay documentos temporales</p>
+                                <p className="text-xs text-muted-foreground">Sube un documento para proporcionar contexto al chat.</p>
                             </div>
                         )}
                     </div>
-
-                    {error && (
-                        <Alert variant="destructive">
-                            <AlertCircle className="size-4" />
-                            <AlertDescription className="text-sm">{error}</AlertDescription>
-                        </Alert>
-                    )}
-
-                    {progress && (
-                        <div className="bg-primary/10 rounded-lg p-3 border border-primary/20">
-                            <div className="text-sm text-primary animate-pulse font-medium">{progress}</div>
-                        </div>
-                    )}
-
-                    <Button onClick={handleUpload} disabled={!canUpload} className="w-full h-12 text-lg font-semibold" size="lg">
-                        {uploading ? (
-                            <>
-                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-foreground mr-2" />
-                                Procesando...
-                            </>
-                        ) : (
-                            <>
-                                <Upload className="size-5 mr-2" />
-                                Subir Documento Temporal
-                            </>
-                        )}
-                    </Button>
-                </div>
-
-                {documents.length === 0 && (
-                    <div className="bg-muted/30 rounded-lg p-8 border border-border text-center">
-                        <FileText className="size-12 mx-auto mb-3 text-muted-foreground" />
-                        <p className="text-base font-medium text-foreground mb-2">
-                            No hay documentos temporales
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                            Sube un documento (PDF, Excel, TXT, MD) para proporcionar contexto al chat. Los documentos se mantienen solo durante esta sesión.
-                        </p>
-                    </div>
-                )}
-
-                <div className="bg-muted/30 rounded-lg p-4 border border-border">
-                    <p className="text-sm text-muted-foreground">
-                        <strong className="text-foreground">Nota:</strong> Los documentos temporales se usan para proporcionar contexto al chat sin almacenarlos permanentemente. Se perderán al recargar la página.
-                    </p>
-                </div>
+                </ScrollArea>
             </CardContent>
         </Card>
     )
