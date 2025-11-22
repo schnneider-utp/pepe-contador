@@ -183,14 +183,14 @@ export function SecondaryUploadSection() {
 
         <div className="bg-muted/30 rounded-lg p-4 border border-border mt-4">
           <p className="text-sm text-muted-foreground">
-            <strong className="text-foreground">Nota:</strong>  Este botón activará el webhook configurado en n8n. Asegúrate de tener tu escenario de Make configurado y activo.
+            <strong className="text-foreground">Nota:</strong>  Este botón activará el webhook configurado en n8n. Asegúrate de tener tu escenario de n8n configurado y activo.
           </p>
         </div>
 
         <Button
           variant="outline"
           className="w-full flex items-center justify-center gap-2"
-          onClick={() => window.open('https://docs.google.com/spreadsheets/d/1Yl2qDkoUw4Q5zYv3RCXt8Cys3_UVtBuGQDCA309XAAA/edit?usp=drive_link', '_blank')}
+          onClick={() => window.open('https://docs.google.com/spreadsheets/d/1yZDscMYNTo-21-sp6VLVBujOpeC93RsUOiD51gP_wwI/edit?gid=403788598#gid=403788598', '_blank')}
         >
           <ExternalLink className="h-4 w-4" />
           Ver en Google Sheets
