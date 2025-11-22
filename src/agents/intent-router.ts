@@ -1,6 +1,6 @@
 import { normalizeText } from "@/agents/utils";
 
-export type IntentAction = "file_upload" | "secondary_upload" | "history" | null;
+export type IntentAction = "file_upload" | "secondary_upload" | "history" | "temporary_context" | null;
 
 export interface IntentResult {
   action: IntentAction;
@@ -20,6 +20,24 @@ const FILE_UPLOAD_KEYWORDS = [
 ];
 
 const DOC_UPLOAD_KEYWORDS = ["documento", "documentos", "doc", "docs", "pdf", "ingreso", "ingresos"];
+
+const TEMPORARY_CONTEXT_KEYWORDS = [
+  "hoja de calculo",
+  "hojas de calculo",
+  "hoja de cálculo",
+  "hojas de cálculo",
+  "spreadsheet",
+  "google sheets",
+  "sheets",
+  "xlsx",
+  "xls",
+  "contexto temporal",
+  "documento temporal",
+  "documentos temporales",
+  "analizar documento",
+  "analizar excel",
+  "analizar hoja",
+];
 
 const HISTORY_KEYWORDS = [
   "historial",
@@ -43,6 +61,15 @@ export function detectIntent(message: string): IntentResult {
   }
 
   const mentionsUpload = text.includes("subir") || text.includes("cargar") || text.includes("adjuntar") || text.includes("analizar") || text.includes("procesar");
+
+  // Prioridad para contexto temporal (Excel, hojas de cálculo)
+  if (includesAny(TEMPORARY_CONTEXT_KEYWORDS)) {
+    return {
+      action: "temporary_context",
+      guide:
+        "Listo. Abriendo la sección de Contexto Temporal para subir documentos Excel, hojas de cálculo o documentos para análisis temporal.",
+    };
+  }
 
   if (mentionsUpload && includesAny(FILE_UPLOAD_KEYWORDS)) {
     return {

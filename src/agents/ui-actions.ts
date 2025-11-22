@@ -1,15 +1,17 @@
-export type UiAction = "file_upload" | "secondary_upload" | "history";
+export type UiAction = "file_upload" | "secondary_upload" | "history" | "temporary_context";
 
 const TAB_VALUES: Record<UiAction, string> = {
   file_upload: "upload",
   secondary_upload: "upload2",
   history: "historial",
+  temporary_context: "contexto",
 };
 
 const TAB_LABELS: Record<UiAction, string> = {
   file_upload: "Subir Gastos",
   secondary_upload: "Subir Ingresos",
   history: "Historial",
+  temporary_context: "Contexto Temporal",
 };
 
 export function performUiAction(action: UiAction): { sectionId: string; sectionLabel: string; success: boolean } {
