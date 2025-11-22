@@ -6,13 +6,18 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
+import { Badge } from '@/components/ui/badge'
 import { ChatService } from '@/agents/chatbot'
 import { handleUserInstruction } from '@/agents/orchestrator'
+import { useTemporaryContext } from '@/contexts/temporary-context'
+import { searchLocalChunks } from '@/lib/text-processing'
+import { GoogleGenerativeAIEmbeddings } from '@langchain/google-genai'
 import ReactMarkdown from 'react-markdown'
 
 type Message = { id: number; text: string; author: 'yo' | 'sistema' }
 
 export function ChatPanel() {
+  const { documents, hasDocuments } = useTemporaryContext()
   const [messages, setMessages] = useState<Message[]>([
     { id: 0, text: 'Chat bloqueado. Ingresa tu API key de Google para activar Gemini.', author: 'sistema' },
   ])
@@ -103,11 +108,42 @@ export function ChatPanel() {
     setSending(true)
     try {
       const svc = serviceRef.current as any
-      const reply = typeof svc.sendSmart === 'function'
-        ? await svc.sendSmart(userText)
-        : typeof svc.sendRag === 'function'
-          ? await svc.sendRag(userText)
-          : await svc.send(userText)
+      let reply: string
+
+      // Si hay documentos temporales, usarlos como contexto
+      if (hasDocuments && documents.length > 0) {
+        // Generar embedding de la consulta
+        const embeddings = new GoogleGenerativeAIEmbeddings({ apiKey, model: 'text-embedding-004' })
+        const queryEmbedding = await embeddings.embedQuery(userText)
+
+        // Buscar en todos los documentos temporales
+        let allMatches: Array<{ content: string; similarity: number; docTitle: string }> = []
+        for (const doc of documents) {
+          const matches = searchLocalChunks(queryEmbedding, doc.chunks, 3)
+          allMatches.push(...matches.map(m => ({ ...m, docTitle: doc.title })))
+        }
+
+        // Ordenar por similitud y tomar los top 5
+        allMatches.sort((a, b) => b.similarity - a.similarity)
+        const topMatches = allMatches.slice(0, 5)
+
+        // Formatear contexto
+        const contextParts = topMatches.map((m, i) => {
+          return `Fragmento ${i + 1} (${m.docTitle}, similitud: ${m.similarity.toFixed(3)}):\n${m.content}`
+        })
+        const temporaryContext = `Contexto de documentos temporales:\n\n${contextParts.join('\n\n')}\n\nUsa este contexto para responder. Si no es suficiente, indica qué falta. Incluye al final: "Fragmentos usados: {lista de índices}".`
+
+        // Enviar con contexto temporal
+        reply = await svc.send(`${temporaryContext}\n\nPregunta del usuario: ${userText}`)
+      } else {
+        // Sin documentos temporales, usar flujo normal
+        reply = typeof svc.sendSmart === 'function'
+          ? await svc.sendSmart(userText)
+          : typeof svc.sendRag === 'function'
+            ? await svc.sendRag(userText)
+            : await svc.send(userText)
+      }
+
       setMessages((prev) => [...prev, { id: nextId(), text: reply, author: 'sistema' }])
     } catch (err) {
       const msg = (err as any)?.message || 'Error al consultar Gemini. Revisa tu API key o intenta de nuevo.'
@@ -123,7 +159,14 @@ export function ChatPanel() {
   return (
     <Card className="h-[600px] border-2 flex flex-col">
       <CardHeader>
-        <CardTitle>Chat {unlocked ? '(activo)' : '(bloqueado)'}</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          Chat {unlocked ? '(activo)' : '(bloqueado)'}
+          {hasDocuments && (
+            <Badge variant="default" className="ml-auto">
+              Contexto activo
+            </Badge>
+          )}
+        </CardTitle>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col gap-3 min-h-0">
         {!unlocked ? (

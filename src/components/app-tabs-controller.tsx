@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { FileUploadSection } from "@/components/file-upload-section"
 import { SecondaryUploadSection } from "@/components/secondary-upload-section"
 import { AccountingTriggerSection } from "@/components/accounting-trigger-section"
+import { TemporaryContextSection } from "@/components/temporary-context-section"
 
 export function AppTabsController() {
   const [activeTab, setActiveTab] = useState<string>("upload")
@@ -25,6 +26,7 @@ export function AppTabsController() {
         <TabsTrigger value="upload">Subir Gastos</TabsTrigger>
         <TabsTrigger value="upload2">Subir Ingresos</TabsTrigger>
         <TabsTrigger value="historial">Historial</TabsTrigger>
+        <TabsTrigger value="contexto">Contexto Temporal</TabsTrigger>
       </TabsList>
       <div className="flex-1 overflow-y-auto">
         <TabsContent value="upload">
@@ -35,6 +37,9 @@ export function AppTabsController() {
         </TabsContent>
         <TabsContent value="historial">
           <AccountingTriggerSection />
+        </TabsContent>
+        <TabsContent value="contexto">
+          <TemporaryContextSection />
         </TabsContent>
       </div>
     </Tabs>
